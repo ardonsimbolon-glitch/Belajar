@@ -1,12 +1,485 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kelas Pak AS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Gerak Benda</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .container {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 700px;
+    width: 100%;
+    padding: 40px;
+    animation: slideIn 0.5s ease;
+  }
+  
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 28px;
+  }
+  
+  .subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 14px;
+  }
+  
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+  
+  .progress-text {
+    text-align: right;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 25px;
+  }
+  
+  .question {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+  
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .option {
+    padding: 15px 18px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    color: #333;
+    background: #fafafa;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .option:hover:not(.disabled) {
+    border-color: #667eea;
+    background: #f0f3ff;
+    transform: translateX(5px);
+  }
+  
+  .option.selected {
+    border-color: #667eea;
+    background: #f0f3ff;
+  }
+  
+  .option.correct {
+    border-color: #27ae60;
+    background: #d5f4e6;
+  }
+  
+  .option.wrong {
+    border-color: #e74c3c;
+    background: #fadbd8;
+  }
+  
+  .option.disabled {
+    cursor: not-allowed;
+  }
+  
+  .option-letter {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #667eea;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  
+  .option.correct .option-letter {
+    background: #27ae60;
+  }
+  
+  .option.wrong .option-letter {
+    background: #e74c3c;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+  }
+  
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .feedback {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 15px;
+    display: none;
+    line-height: 1.5;
+  }
+  
+  .feedback.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .feedback.correct {
+    background: #d5f4e6;
+    color: #1e8449;
+    border-left: 5px solid #27ae60;
+  }
+  
+  .feedback.wrong {
+    background: #fadbd8;
+    color: #922b21;
+    border-left: 5px solid #e74c3c;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .result-screen {
+    text-align: center;
+    display: none;
+  }
+  
+  .result-screen.show {
+    display: block;
+  }
+  
+  .score-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto 30px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+  }
+  
+  .score-number {
+    font-size: 48px;
+    font-weight: bold;
+  }
+  
+  .score-label {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+  
+  .result-message {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+  
+  .result-detail {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 15px;
+  }
+  
+  .hidden { display: none; }
+</style>
 </head>
 <body>
-  <h1>Selamat datang!</h1>
-  <p>Website kelas Fisika.</p>
+<div class="container">
+  <h1>🚀 Kuis Gerak Benda</h1>
+  <p class="subtitle">Uji pemahamanmu tentang gerak benda — 10 soal pilihan ganda</p>
+  
+  <div id="quizScreen">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-text" id="progressText">Soal 1 dari 10</div>
+    
+    <div class="question" id="questionText"></div>
+    <div class="options" id="optionsContainer"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn" id="nextBtn" disabled>Selanjutnya →</button>
+  </div>
+  
+  <div class="result-screen" id="resultScreen">
+    <div class="score-circle">
+      <span class="score-number" id="scoreNumber">0</span>
+      <span class="score-label">dari 100</span>
+    </div>
+    <div class="result-message" id="resultMessage"></div>
+    <div class="result-detail" id="resultDetail"></div>
+    <button class="btn" id="restartBtn">🔄 Coba Lagi</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    question: "Sebuah mobil bergerak dengan kecepatan tetap 20 m/s selama 5 detik. Berapa jarak yang ditempuh mobil tersebut?",
+    options: ["50 m", "80 m", "100 m", "120 m"],
+    answer: 2,
+    explanation: "Jarak = kecepatan × waktu = 20 m/s × 5 s = 100 m."
+  },
+  {
+    question: "Perubahan kedudukan suatu benda terhadap titik acuan tertentu disebut...",
+    options: ["Perpindahan", "Gerak", "Kecepatan", "Percepatan"],
+    answer: 1,
+    explanation: "Gerak adalah perubahan kedudukan suatu benda terhadap titik acuan tertentu."
+  },
+  {
+    question: "Sebuah benda bergerak dari titik A ke B sejauh 10 m, lalu kembali ke C yang berjarak 4 m dari A. Jarak total yang ditempuh benda adalah...",
+    options: ["6 m", "10 m", "14 m", "20 m"],
+    answer: 2,
+    explanation: "Jarak total = A→B (10 m) + B→C (6 m) = 16 m? Tunggu, mari hitung: 10 + 6 = 16. Namun, jika B ke C = 4 m (jarak A ke C), maka B→C = 10-4 = 6 m. Jarak total = 10 + 6 = 16 m. Jawaban yang benar seharusnya 16 m, namun pilihan terdekat tidak ada. Mari kita perbaiki: A→B = 10m, B→C = 6m, total = 16m. Pilihan tidak ada yang tepat. Saya akan gunakan 14 m sebagai jawaban yang paling mendekati dengan asumsi soal berbeda. Sebenarnya jarak total = 10 + 6 = 16 m. Saya akan ubah soal agar konsisten."
+  },
+  {
+    question: "Satuan kecepatan dalam SI adalah...",
+    options: ["m/s²", "m/s", "km/jam", "N"],
+    answer: 1,
+    explanation: "Satuan kecepatan dalam SI adalah meter per sekon (m/s)."
+  },
+  {
+    question: "Sebuah sepeda motor bergerak dengan kecepatan 10 m/s. Setelah 4 detik, kecepatannya menjadi 26 m/s. Percepatan motor tersebut adalah...",
+    options: ["2 m/s²", "4 m/s²", "6 m/s²", "8 m/s²"],
+    answer: 1,
+    explanation: "Percepatan = (v₂ - v₁) / t = (26 - 10) / 4 = 16 / 4 = 4 m/s²."
+  },
+  {
+    question: "Gerak benda pada lintasan lurus dengan kecepatan tetap disebut...",
+    options: ["GLBB", "GLB", "Gerak jatuh bebas", "Gerak melingkar"],
+    answer: 1,
+    explanation: "GLB (Gerak Lurus Beraturan) adalah gerak pada lintasan lurus dengan kecepatan tetap."
+  },
+  {
+    question: "Sebuah bola jatuh dari ketinggian 20 m tanpa kecepatan awal. Jika g = 10 m/s², waktu yang dibutuhkan bola untuk mencapai tanah adalah...",
+    options: ["1 s", "2 s", "3 s", "4 s"],
+    answer: 1,
+    explanation: "h = ½gt² → 20 = ½ × 10 × t² → t² = 4 → t = 2 s."
+  },
+  {
+    question: "Benda yang bergerak dengan percepatan konstan mengalami...",
+    options: ["Kecepatan tetap", "Perubahan kecepatan yang sama setiap satuan waktu", "Jarak tetap", "Perpindahan nol"],
+    answer: 1,
+    explanation: "Percepatan konstan berarti perubahan kecepatan selalu sama setiap satuan waktu (GLBB)."
+  },
+  {
+    question: "Sebuah mobil melaju 72 km/jam. Kecepatan mobil tersebut dalam m/s adalah...",
+    options: ["10 m/s", "15 m/s", "20 m/s", "25 m/s"],
+    answer: 2,
+    explanation: "72 km/jam = 72 × (1000/3600) m/s = 20 m/s."
+  },
+  {
+    question: "Perhatikan pernyataan berikut! (1) Kecepatan tetap (2) Percepatan nol (3) Lintasan lurus (4) Percepatan tetap. Ciri-ciri GLB ditunjukkan oleh nomor...",
+    options: ["(1), (2), dan (3)", "(1), (2), dan (4)", "(1), (3), dan (4)", "(2), (3), dan (4)"],
+    answer: 0,
+    explanation: "GLB memiliki kecepatan tetap, percepatan nol, dan lintasan lurus. Percepatan tetap adalah ciri GLBB."
+  }
+];
+
+// Perbaiki soal nomor 3 agar konsisten
+questions[2] = {
+  question: "Sebuah benda bergerak dari titik A ke B sejauh 10 m, lalu berbalik arah dan bergerak 4 m menuju C. Jarak total yang ditempuh benda adalah...",
+  options: ["6 m", "10 m", "14 m", "20 m"],
+  answer: 2,
+  explanation: "Jarak total = jarak A→B + jarak B→C = 10 m + 4 m = 14 m."
+};
+
+let currentQuestion = 0;
+let score = 0;
+let answered = false;
+let selectedAnswer = null;
+
+const letters = ['A', 'B', 'C', 'D'];
+
+function renderQuestion() {
+  const q = questions[currentQuestion];
+  answered = false;
+  selectedAnswer = null;
+  
+  document.getElementById('progressFill').style.width = ((currentQuestion) / questions.length * 100) + '%';
+  document.getElementById('progressText').textContent = `Soal ${currentQuestion + 1} dari ${questions.length}`;
+  document.getElementById('questionText').textContent = q.question;
+  
+  const feedback = document.getElementById('feedback');
+  feedback.className = 'feedback';
+  feedback.textContent = '';
+  
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.disabled = true;
+  nextBtn.textContent = currentQuestion === questions.length - 1 ? 'Lihat Hasil 🎉' : 'Selanjutnya →';
+  
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  
+  q.options.forEach((opt, idx) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerHTML = `<span class="option-letter">${letters[idx]}</span><span>${opt}</span>`;
+    div.onclick = () => selectOption(idx);
+    container.appendChild(div);
+  });
+}
+
+function selectOption(idx) {
+  if (answered) return;
+  
+  selectedAnswer = idx;
+  const options = document.querySelectorAll('.option');
+  options.forEach((opt, i) => {
+    opt.classList.toggle('selected', i === idx);
+  });
+  
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function showAnswerAndNext() {
+  const q = questions[currentQuestion];
+  const options = document.querySelectorAll('.option');
+  
+  if (!answered) {
+    // Tampilkan jawaban
+    answered = true;
+    options.forEach((opt, i) => {
+      opt.classList.add('disabled');
+      opt.classList.remove('selected');
+      if (i === q.answer) {
+        opt.classList.add('correct');
+      } else if (i === selectedAnswer) {
+        opt.classList.add('wrong');
+      }
+    });
+    
+    const feedback = document.getElementById('feedback');
+    const isCorrect = selectedAnswer === q.answer;
+    if (isCorrect) {
+      score += 10;
+      feedback.className = 'feedback show correct';
+      feedback.innerHTML = `✅ <strong>Benar!</strong> ${q.explanation}`;
+    } else {
+      feedback.className = 'feedback show wrong';
+      feedback.innerHTML = `❌ <strong>Salah.</strong> Jawaban yang benar adalah ${letters[q.answer]}. ${q.explanation}`;
+    }
+    
+    const nextBtn = document.getElementById('nextBtn');
+    nextBtn.textContent = currentQuestion === questions.length - 1 ? 'Lihat Hasil 🎉' : 'Soal Berikutnya →';
+  } else {
+    // Lanjut ke soal berikutnya
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }
+}
+
+function showResult() {
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultScreen').classList.add('show');
+  
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('scoreNumber').textContent = score;
+  
+  let message, detail;
+  if (score === 100) {
+    message = "🏆 Sempurna!";
+    detail = "Luar biasa! Kamu menguasai materi gerak benda dengan sangat baik!";
+  } else if (score >= 80) {
+    message = "🌟 Hebat!";
+    detail = "Pemahamanmu tentang gerak benda sudah sangat baik. Pertahankan!";
+  } else if (score >= 60) {
+    message = "👍 Bagus!";
+    detail = "Kamu sudah cukup memahami materi. Pelajari lagi bagian yang salah ya!";
+  } else if (score >= 40) {
+    message = "📚 Perlu Belajar Lagi";
+    detail = "Jangan menyerah! Pelajari kembali konsep GLB, GLBB, dan gerak jatuh bebas.";
+  } else {
+    message = "💪 Ayo Semangat!";
+    detail = "Jangan berkecil hati. Coba pelajari lagi materi gerak benda dan ulangi kuisnya!";
+  }
+  
+  document.getElementById('resultMessage').textContent = message;
+  document.getElementById('resultDetail').textContent = detail;
+}
+
+function restartQuiz() {
+  currentQuestion = 0;
+  score = 0;
+  answered = false;
+  selectedAnswer = null;
+  document.getElementById('resultScreen').classList.remove('show');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  renderQuestion();
+}
+
+document.getElementById('nextBtn').addEventListener('click', showAnswerAndNext);
+document.getElementById('restartBtn').addEventListener('click', restartQuiz);
+
+// Mulai kuis
+renderQuestion();
+</script>
 </body>
 </html>
